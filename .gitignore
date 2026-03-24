@@ -1,0 +1,21 @@
+# Distribution build output
+dist/
+
+# OneNote source files
+*.one
+*.onetoc2
+
+# Database (rebuilt from PDFs)
+knowledge_base.db
+
+# Extracted images (rebuilt from PDFs)
+kb_images/
+
+# Source PDFs
+pdfs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/

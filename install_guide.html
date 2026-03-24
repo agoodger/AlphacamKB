@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alphacam Knowledge Base - Installation Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f4f8; color: #1e293b; padding: 40px 20px; }
+  .container { max-width: 700px; margin: 0 auto; }
+  h1 { text-align: center; font-size: 24px; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #64748b; margin-bottom: 40px; font-size: 14px; }
+
+  .flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  .step {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 28px;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+  }
+  .step-num {
+    position: absolute;
+    top: -14px;
+    left: 20px;
+    background: #3b82f6;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .step h3 { font-size: 16px; margin-bottom: 6px; }
+  .step p { font-size: 14px; color: #475569; line-height: 1.5; }
+  .step code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+  }
+  .step a { color: #3b82f6; text-decoration: none; }
+  .step a:hover { text-decoration: underline; }
+  .step .note {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #92400e;
+  }
+
+  .arrow {
+    width: 2px;
+    height: 32px;
+    background: #cbd5e1;
+    position: relative;
+  }
+  .arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #cbd5e1;
+  }
+
+  .decision {
+    background: #eff6ff;
+    border: 2px solid #93c5fd;
+    border-radius: 12px;
+    padding: 16px 24px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+  }
+  .decision h3 { font-size: 15px; color: #1d4ed8; }
+  .decision p { font-size: 13px; color: #3b82f6; margin-top: 4px; }
+
+  .branch {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+    justify-content: center;
+  }
+  .branch-yes, .branch-no {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .branch-yes { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .branch-no { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+  .done {
+    background: #10b981;
+    color: white;
+    border-radius: 12px;
+    padding: 20px 28px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+  }
+  .done h3 { font-size: 16px; }
+  .done p { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+
+  .prereq {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 28px;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 30px;
+  }
+  .prereq h2 { font-size: 16px; margin-bottom: 10px; color: #0f172a; }
+  .prereq table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .prereq td { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+  .prereq td:first-child { font-weight: 600; width: 40%; }
+  .prereq td:last-child { color: #475569; }
+
+  .files {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 28px;
+    width: 100%;
+    max-width: 500px;
+    margin-top: 30px;
+  }
+  .files h2 { font-size: 16px; margin-bottom: 10px; }
+  .tree { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 13px; line-height: 1.8; color: #475569; }
+  .tree b { color: #1e293b; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Alphacam Knowledge Base</h1>
+<p class="subtitle">Installation Guide</p>
+
+<div class="prereq">
+  <h2>Prerequisites</h2>
+  <table>
+    <tr><td>Python</td><td>3.10 or later</td></tr>
+    <tr><td>OS</td><td>Windows 10 / 11</td></tr>
+    <tr><td>Other dependencies</td><td>None (stdlib only)</td></tr>
+    <tr><td>Disk space</td><td>~150 MB</td></tr>
+  </table>
+</div>
+
+<div class="flow">
+
+  <div class="step">
+    <span class="step-num">1</span>
+    <h3>Copy the AlphacamKB folder</h3>
+    <p>Copy the entire <code>AlphacamKB</code> folder to the target PC (e.g. to <code>C:\AlphacamKB</code> or anywhere you like).</p>
+  </div>
+
+  <div class="arrow"></div>
+
+  <div class="decision">
+    <h3>Is Python installed?</h3>
+    <p>Open a command prompt and type: <code>python --version</code></p>
+  </div>
+
+  <div class="arrow"></div>
+
+  <div class="branch">
+    <div class="branch-yes">
+      YES &mdash; Python 3.10+<br>
+      Skip to Step 3
+    </div>
+    <div class="branch-no">
+      NO &mdash; not found<br>
+      Go to Step 2
+    </div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <div class="step">
+    <span class="step-num">2</span>
+    <h3>Install Python (if needed)</h3>
+    <p>Download from <a href="https://www.python.org/downloads/">python.org/downloads</a></p>
+    <div class="note">
+      IMPORTANT: On the first installer screen, tick <strong>"Add Python to PATH"</strong> before clicking Install Now.
+    </div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <div class="step">
+    <span class="step-num">3</span>
+    <h3>Run the installer</h3>
+    <p>Open the <code>AlphacamKB</code> folder and double-click <code>install.bat</code>.</p>
+    <p style="margin-top:6px">This checks Python is available and creates a Desktop shortcut. No admin rights needed.</p>
+  </div>
+
+  <div class="arrow"></div>
+
+  <div class="done">
+    <h3>Done!</h3>
+    <p>Double-click "Alphacam Knowledge Base" on the Desktop.<br>The browser opens automatically to http://localhost:8080</p>
+  </div>
+
+</div>
+
+<div class="files">
+  <h2>What's in the folder</h2>
+  <div class="tree">
+    <b>AlphacamKB/</b><br>
+    &nbsp;&nbsp;install.bat &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>-- run once to set up</i><br>
+    &nbsp;&nbsp;launch.bat &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>-- starts the server</i><br>
+    &nbsp;&nbsp;db_server.py &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>-- Python web server</i><br>
+    &nbsp;&nbsp;knowledge_base.db &nbsp;&nbsp;&nbsp;<i>-- article database</i><br>
+    &nbsp;&nbsp;<b>ui/</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>-- web interface</i><br>
+    &nbsp;&nbsp;<b>kb_images/</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>-- extracted images</i><br>
+    &nbsp;&nbsp;<b>pdfs/</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>-- source PDFs (Open PDF links)</i><br>
+    &nbsp;&nbsp;install_guide.html &nbsp;&nbsp;<i>-- this guide</i><br>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
