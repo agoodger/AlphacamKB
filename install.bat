@@ -122,8 +122,19 @@ if not exist "%DESKTOP_PATH%" (
     exit /b 1
 )
 
-:: Use PowerShell to create a proper .lnk shortcut
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut(\"%DESKTOP_PATH%\%SHORTCUT_NAME%.lnk\"); $sc.TargetPath = \"%LAUNCH_PATH%\"; $sc.WorkingDirectory = \"%~dp0\"; $sc.Description = \"Launch Alphacam Knowledge Base\"; $sc.IconLocation = \"shell32.dll,14\"; $sc.Save()"
+:: Write a temporary PowerShell script to avoid quoting issues with paths
+set "PS_SCRIPT=%TEMP%\create_shortcut.ps1"
+(
+    echo $ws = New-Object -ComObject WScript.Shell
+    echo $sc = $ws.CreateShortcut^('%DESKTOP_PATH%\%SHORTCUT_NAME%.lnk'^)
+    echo $sc.TargetPath = '%LAUNCH_PATH%'
+    echo $sc.WorkingDirectory = '%~dp0'
+    echo $sc.Description = 'Launch Alphacam Knowledge Base'
+    echo $sc.IconLocation = 'shell32.dll,14'
+    echo $sc.Save^(^)
+) > "%PS_SCRIPT%"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%PS_SCRIPT%"
+del "%PS_SCRIPT%" 2>nul
 
 if %errorlevel%==0 (
     echo         Shortcut created on Desktop.
