@@ -1,11 +1,12 @@
 """Build a distributable package of the Alphacam Knowledge Base."""
 
 import shutil
+import time
 from pathlib import Path
 
 SRC_DIR = Path(__file__).resolve().parent
 PDF_SRC = Path(r"C:/Users/agoodger/Downloads/PDFs")
-OUT_DIR = SRC_DIR / "dist" / "AlphacamKB"
+OUT_DIR = Path.home() / "AlphacamKB_dist" / "AlphacamKB"
 
 FILES = [
     "db_server.py",
@@ -23,7 +24,16 @@ DIRS = [
 def main():
     if OUT_DIR.exists():
         print(f"Removing old package: {OUT_DIR}")
-        shutil.rmtree(OUT_DIR)
+        for attempt in range(5):
+            try:
+                shutil.rmtree(OUT_DIR)
+                break
+            except PermissionError:
+                if attempt < 4:
+                    print(f"  Folder locked (OneDrive?), retrying in 2s...")
+                    time.sleep(2)
+                else:
+                    raise
 
     OUT_DIR.mkdir(parents=True)
     print(f"Building package in: {OUT_DIR}")
