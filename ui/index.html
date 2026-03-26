@@ -1131,6 +1131,62 @@ body {
 .confirm-box h3 { margin-bottom: 8px; font-size: 18px; }
 .confirm-box p { margin-bottom: 20px; color: var(--color-text-secondary); font-size: 14px; line-height: 1.5; }
 .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+/* Username prompt */
+.username-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+}
+.username-box {
+  background: var(--color-bg-card); border-radius: var(--radius-lg); padding: 32px;
+  max-width: 380px; width: 90%; box-shadow: var(--shadow-xl); text-align: center;
+}
+.username-box h3 { margin-bottom: 8px; font-size: 18px; }
+.username-box p { margin-bottom: 16px; color: var(--color-text-secondary); font-size: 14px; }
+.username-box .form-input { margin-bottom: 16px; text-align: center; }
+/* User badge in header */
+.user-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+  border-radius: 99px; border: 1px solid var(--color-border); font-size: 12px;
+  color: var(--color-text-secondary); cursor: pointer; transition: all var(--transition);
+  white-space: nowrap;
+}
+.user-badge:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.user-badge svg { flex-shrink: 0; }
+/* Recycle bin */
+.recycle-btn {
+  display: flex; align-items: center; gap: 8px; padding: 10px 16px; margin: 0 16px;
+  border-radius: var(--radius-md); border: 1px dashed var(--color-border); cursor: pointer;
+  font-size: 13px; color: var(--color-text-secondary); background: none;
+  font-family: var(--font-family); transition: all var(--transition); width: calc(100% - 32px);
+}
+.recycle-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.recycle-btn.active { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-accent-subtle); border-style: solid; }
+.deleted-badge { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: var(--color-danger); color: white; font-weight: 600; }
+.restore-btn {
+  padding: 4px 12px; border-radius: var(--radius-md); border: 1px solid var(--color-accent-green);
+  background: var(--color-accent-green); color: #1a1a2e; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-family); transition: all var(--transition);
+}
+.restore-btn:hover { background: var(--color-accent-green-hover); }
+/* Audit history */
+.audit-list { display: flex; flex-direction: column; gap: 8px; }
+.audit-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  background: var(--color-bg); border-radius: var(--radius-md); font-size: 13px;
+}
+.audit-action {
+  padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+}
+.audit-action-create { background: #dcfce7; color: #166534; }
+.audit-action-edit { background: #dbeafe; color: #1e40af; }
+.audit-action-delete { background: #fee2e2; color: #991b1b; }
+.audit-action-restore { background: #fef9c3; color: #854d0e; }
+[data-theme="dark"] .audit-action-create { background: #14532d; color: #86efac; }
+[data-theme="dark"] .audit-action-edit { background: #1e3a5f; color: #93c5fd; }
+[data-theme="dark"] .audit-action-delete { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .audit-action-restore { background: #422006; color: #fde047; }
+.audit-meta { color: var(--color-text-tertiary); font-size: 12px; }
+.article-audit-info { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 16px; }
 
 /* Responsive */
 @media (max-width: 900px) {
@@ -1194,6 +1250,10 @@ body {
     </div>
   </div>
   <div class="header-right">
+    <span class="user-badge" id="userBadge" title="Click to change name">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="userBadgeName"></span>
+    </span>
     <span class="article-count" id="articleCount"></span>
     <button class="btn btn-green" id="newArticleBtn" style="padding:6px 14px;font-size:13px">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1223,6 +1283,13 @@ body {
       <div class="tag-cloud" id="tagCloud">
         <span style="color:var(--color-text-tertiary);font-size:13px;">Loading...</span>
       </div>
+    </div>
+    <div class="sidebar-section">
+      <button class="recycle-btn" id="recycleBinBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Recycle Bin
+        <span id="recycleBinCount" style="margin-left:auto"></span>
+      </button>
     </div>
   </aside>
 
@@ -1299,6 +1366,10 @@ body {
         <div class="tag-input-wrap" id="tagWrap">
           <input type="text" class="tag-input-field" id="tagField" placeholder="Type and press Enter...">
         </div>
+        <button class="add-link-btn" id="suggestTagsBtn" type="button" style="margin-top:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Auto-suggest tags from content
+        </button>
       </div>
       <div class="form-group">
         <label class="form-label">Content</label>
@@ -1355,6 +1426,40 @@ body {
   'use strict';
 
   const API = '';
+
+  // Username management
+  function getUsername() { return localStorage.getItem('kb_username') || ''; }
+  function setUsername(name) { localStorage.setItem('kb_username', name); updateUserBadge(); }
+  function updateUserBadge() {
+    const name = getUsername();
+    document.getElementById('userBadgeName').textContent = name || 'Set name';
+  }
+  function promptUsername(force) {
+    const current = getUsername();
+    if (current && !force) { updateUserBadge(); return; }
+    const overlay = document.createElement('div');
+    overlay.className = 'username-overlay';
+    overlay.innerHTML = `
+      <div class="username-box">
+        <h3>Welcome to the Knowledge Base</h3>
+        <p>Enter your name so edits can be attributed to you.</p>
+        <input type="text" class="form-input" id="usernameInput" placeholder="Your name..." value="${current}">
+        <button class="btn btn-primary" id="usernameSubmit" style="width:100%">Continue</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const inp = overlay.querySelector('#usernameInput');
+    const submit = () => {
+      const val = inp.value.trim();
+      if (!val) { inp.focus(); return; }
+      setUsername(val);
+      overlay.remove();
+    };
+    overlay.querySelector('#usernameSubmit').addEventListener('click', submit);
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    inp.focus();
+  }
+
   let state = {
     query: '',
     category: null,
@@ -1404,8 +1509,10 @@ body {
     return function(...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
   }
 
-  // API helper
+  // API helper - injects X-User header on all requests
   async function api(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({ 'X-User': getUsername() }, opts.headers || {});
     const resp = await fetch(API + path, opts);
     if (!resp.ok) throw new Error(`API error: ${resp.status}`);
     return resp.json();
@@ -1737,6 +1844,11 @@ body {
       html += `<a href="/api/pdfs/${encodeURIComponent(a.source_pdf)}${pdfPage}" target="_blank" rel="noopener" class="result-meta-item" style="color:var(--color-accent);text-decoration:none;cursor:pointer" title="Open source PDF at page ${a.source_page || 1}">${icons.file} Open PDF</a>`;
     }
     html += '</div>';
+    // Audit info
+    const auditParts = [];
+    if (a.created_by) auditParts.push(`Created by <strong>${esc(a.created_by)}</strong>`);
+    if (a.updated_by && a.updated_at) auditParts.push(`Last edited by <strong>${esc(a.updated_by)}</strong> on ${formatDate(a.updated_at)}`);
+    if (auditParts.length) html += `<div class="article-audit-info">${auditParts.join(' &middot; ')}</div>`;
     if (a.tags && a.tags.length) {
       html += '<div class="result-tags" style="margin-bottom:20px">' + a.tags.map(t => `<span class="result-tag">${esc(t)}</span>`).join('') + '</div>';
     }
@@ -1775,12 +1887,31 @@ body {
         <div class="article-people-list">${a.people_mentioned.map(p => `<span class="article-person"><span class="person-avatar" style="background:${getAvatarColor(p)};margin-left:0;border:none;width:24px;height:24px;font-size:10px">${getInitials(p)}</span>${esc(p)}</span>`).join('')}</div>
       </div>`;
     }
+    // History section placeholder
+    html += '<div class="article-section" id="historySection" style="display:none"><div class="article-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Activity History</div><div class="audit-list" id="auditList"></div></div>';
+
     articlePanelBody.innerHTML = html;
     articlePanelBody.querySelectorAll('.article-image').forEach(el => {
       el.addEventListener('click', () => {
         openLightbox(el.dataset.imgSrc, el.dataset.imgName || '', el.dataset.sourcePdf || '', el.dataset.sourcePage || '');
       });
     });
+
+    // Load history
+    if (a.id) {
+      api(`/api/articles/${a.id}/history`).then(data => {
+        const history = data.history || [];
+        if (!history.length) return;
+        $('historySection').style.display = '';
+        $('auditList').innerHTML = history.map(h => `
+          <div class="audit-item">
+            <span class="audit-action audit-action-${h.action}">${h.action}</span>
+            <strong>${esc(h.user)}</strong>
+            <span class="audit-meta">${formatDate(h.timestamp)}</span>
+          </div>
+        `).join('');
+      }).catch(() => {});
+    }
   }
 
   // ==========================================
@@ -1944,6 +2075,45 @@ body {
   });
 
   $('tagWrap').addEventListener('click', () => $('tagField').focus());
+
+  // Auto-tag rules (mirrors extract_and_build_db.py TAG_RULES)
+  const TAG_RULES = [
+    [/crash/i, 'crashing'],
+    [/install/i, 'installation'],
+    [/graphic.?card|GPU|nvidia|dxdiag/i, 'graphics'],
+    [/licen[cs]e|server code/i, 'licensing'],
+    [/font|\.ttf|\.otf/i, 'fonts'],
+    [/registry|regedit|HKEY/i, 'registry'],
+    [/nest/i, 'nesting'],
+    [/network/i, 'networking'],
+    [/\+Label|xlabel|label/i, 'label'],
+    [/solid|IGES|STL/i, 'solids'],
+    [/post|machining/i, 'machining'],
+    [/training|certificate/i, 'training'],
+    [/error|warning/i, 'errors'],
+    [/slow|performance/i, 'performance'],
+    [/import|export|DXF|DWG/i, 'file-import-export'],
+  ];
+  function suggestTags(text) {
+    const tags = new Set();
+    TAG_RULES.forEach(([pattern, tag]) => { if (pattern.test(text)) tags.add(tag); });
+    const t = text.toLowerCase();
+    if (t.includes('save') && (t.includes('crash') || t.includes('slow'))) tags.add('saving-issues');
+    if (t.includes('windows') && (t.includes('update') || t.includes('repair'))) tags.add('windows');
+    return [...tags].sort();
+  }
+  $('suggestTagsBtn').addEventListener('click', () => {
+    const text = ($('edTitleInput').value + ' ' + $('edContent').value).trim();
+    if (!text) { showToast('Add a title or content first'); return; }
+    const suggested = suggestTags(text);
+    if (!suggested.length) { showToast('No tags detected from content'); return; }
+    let added = 0;
+    suggested.forEach(tag => {
+      if (!editor.tags.includes(tag)) { editor.tags.push(tag); added++; }
+    });
+    renderEditorTags();
+    showToast(added ? `Added ${added} tag${added > 1 ? 's' : ''}: ${suggested.join(', ')}` : 'All suggested tags already added');
+  });
 
   // Editor: Images
   function renderEditorImages() {
@@ -2113,13 +2283,80 @@ body {
   }
 
   // Delete
+  // Reusable confirmation dialog
+  function confirmAction(title, message, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-box">
+        <h3>${title}</h3>
+        <p>${message}</p>
+        <div class="confirm-actions">
+          <button class="btn confirm-no">Cancel</button>
+          <button class="btn btn-danger-text confirm-yes" style="background:var(--color-danger);color:white;border-color:var(--color-danger)">Confirm</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelector('.confirm-no').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('.confirm-yes').addEventListener('click', async () => {
+      try { await onConfirm(); } catch (e) { showToast('Error: ' + e.message); }
+      overlay.remove();
+    });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  // Admin-protected confirmation (requires password)
+  function confirmAdminAction(title, message, onConfirm) {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-box">
+        <h3>${title}</h3>
+        <p>${message}</p>
+        <label class="form-label" style="text-align:left;margin-top:12px">Admin Password</label>
+        <input type="password" class="form-input" id="adminPwInput" placeholder="Enter admin password..." style="margin-bottom:16px">
+        <div id="adminPwError" style="color:var(--color-danger);font-size:13px;margin-bottom:12px;display:none">Incorrect password</div>
+        <div class="confirm-actions">
+          <button class="btn confirm-no">Cancel</button>
+          <button class="btn btn-danger-text confirm-yes" style="background:var(--color-danger);color:white;border-color:var(--color-danger)">Confirm</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const pwInput = overlay.querySelector('#adminPwInput');
+    const errMsg = overlay.querySelector('#adminPwError');
+    overlay.querySelector('.confirm-no').addEventListener('click', () => overlay.remove());
+    const doConfirm = async () => {
+      const pw = pwInput.value.trim();
+      if (!pw) { pwInput.focus(); return; }
+      try {
+        await onConfirm(pw);
+        overlay.remove();
+      } catch (e) {
+        if (e.message.includes('403')) {
+          errMsg.style.display = '';
+          pwInput.value = '';
+          pwInput.focus();
+        } else {
+          showToast('Error: ' + e.message);
+          overlay.remove();
+        }
+      }
+    };
+    overlay.querySelector('.confirm-yes').addEventListener('click', doConfirm);
+    pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doConfirm(); });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    setTimeout(() => pwInput.focus(), 100);
+  }
+
   function deleteArticle(id) {
     const overlay = document.createElement('div');
     overlay.className = 'confirm-overlay';
     overlay.innerHTML = `
       <div class="confirm-box">
         <h3>Delete Article</h3>
-        <p>Are you sure you want to delete this article? This cannot be undone.</p>
+        <p>This article will be moved to the Recycle Bin and can be restored later.</p>
         <div class="confirm-actions">
           <button class="btn confirm-no">Cancel</button>
           <button class="btn btn-danger-text confirm-yes" style="background:var(--color-danger);color:white;border-color:var(--color-danger)">Delete</button>
@@ -2206,8 +2443,107 @@ body {
     });
   }
 
+  // Recycle bin
+  async function showRecycleBin() {
+    state.query = '';
+    state.category = null;
+    state.tag = null;
+    searchInput.value = '';
+    renderCategories();
+    renderTags();
+    renderActiveFilters();
+    $('recycleBinBtn').classList.add('active');
+    contentArea.innerHTML = '<div class="loading-state"><div class="spinner"></div><span>Loading recycle bin...</span></div>';
+    try {
+      const data = await api('/api/articles/deleted');
+      const items = data.results || [];
+      if (!items.length) {
+        contentArea.innerHTML = '<div class="empty-state fade-in"><div class="empty-state-title">Recycle Bin is empty</div><div class="empty-state-text">Deleted articles will appear here and can be restored.</div></div>';
+        return;
+      }
+      let html = `<div class="results-info fade-in"><span>${items.length} deleted article${items.length !== 1 ? 's' : ''}</span><button class="btn btn-danger-text" id="emptyRecycleBin" style="font-size:12px;padding:4px 12px">Empty Recycle Bin</button></div><div class="results-list">`;
+      items.forEach((r, i) => {
+        html += `<div class="result-card fade-in" style="animation-delay:${i*30}ms;opacity:0.8">
+          <div class="result-title">
+            <span class="deleted-badge">Deleted</span>
+            ${esc(r.title || 'Untitled')}
+          </div>
+          <div class="result-content">${esc(truncate(r.content || '', 150))}</div>
+          <div class="result-meta">
+            ${r.category ? `<span class="result-meta-item">${icons.folder}${esc(r.category)}</span>` : ''}
+            ${r.deleted_by ? `<span class="result-meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Deleted by ${esc(r.deleted_by)}</span>` : ''}
+            ${r.deleted_at ? `<span class="result-meta-item">${icons.calendar}${formatDate(r.deleted_at)}</span>` : ''}
+            <button class="restore-btn" data-restore-id="${r.id}">Restore</button>
+            <button class="btn btn-danger-text" data-perm-id="${r.id}" style="font-size:11px;padding:3px 10px">Delete permanently</button>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+      contentArea.innerHTML = html;
+      contentArea.querySelectorAll('.restore-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          try {
+            await api(`/api/articles/${btn.dataset.restoreId}/restore`, { method: 'POST' });
+            showToast('Article restored');
+            await init();
+            showRecycleBin();
+          } catch (err) { showToast('Failed to restore: ' + err.message); }
+        });
+      });
+      // Permanent delete per item (admin password required)
+      contentArea.querySelectorAll('[data-perm-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          confirmAdminAction('Permanently Delete', 'This article will be gone forever. This cannot be undone.', async (pw) => {
+            await api(`/api/articles/${btn.dataset.permId}/permanent`, { method: 'DELETE', headers: { 'X-Admin-Password': pw } });
+            showToast('Article permanently deleted');
+            await init();
+            showRecycleBin();
+          });
+        });
+      });
+      // Empty recycle bin (admin password required)
+      const emptyBtn = $('emptyRecycleBin');
+      if (emptyBtn) {
+        emptyBtn.addEventListener('click', () => {
+          confirmAdminAction('Empty Recycle Bin', `Permanently delete all ${items.length} article${items.length !== 1 ? 's' : ''}? This cannot be undone.`, async (pw) => {
+            await api('/api/articles/deleted/empty', { method: 'POST', headers: { 'X-Admin-Password': pw } });
+            showToast('Recycle bin emptied');
+            await init();
+            showRecycleBin();
+          });
+        });
+      }
+    } catch (e) {
+      contentArea.innerHTML = '<div class="empty-state"><div class="empty-state-title">Failed to load recycle bin</div></div>';
+    }
+  }
+
+  $('recycleBinBtn').addEventListener('click', showRecycleBin);
+
+  // Clear recycle bin active state when searching
+  const origPerformSearch = performSearch;
+  performSearch = async function() {
+    $('recycleBinBtn').classList.remove('active');
+    return origPerformSearch();
+  };
+
+  // User badge click to change name
+  $('userBadge').addEventListener('click', () => promptUsername(true));
+
+  // Load recycle bin count
+  async function updateRecycleBinCount() {
+    try {
+      const data = await api('/api/articles/deleted');
+      const count = (data.results || []).length;
+      $('recycleBinCount').textContent = count > 0 ? count : '';
+    } catch (e) {}
+  }
+
   // Init
-  init();
+  promptUsername(false);
+  init().then(() => updateRecycleBinCount());
 })();
 </script>
 </body>
