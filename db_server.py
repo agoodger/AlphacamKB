@@ -2,6 +2,7 @@
 
 import http.server
 import json
+import base64
 import sqlite3
 import os
 import re
@@ -73,13 +74,56 @@ class KBHandler(http.server.BaseHTTPRequestHandler):
 
     def send_cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
 
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_cors_headers()
         self.end_headers()
+
+    def read_json_body(self):
+        length = int(self.headers.get('Content-Length', 0))
+        if not length:
+            return {}
+        return json.loads(self.rfile.read(length))
+
+    def do_POST(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path.rstrip("/")
+        try:
+            if path == "/api/articles":
+                self.handle_create_article(self.read_json_body())
+            elif path == "/api/images/upload":
+                self.handle_upload_images(self.read_json_body())
+            else:
+                self.send_json({"error": "Not found"}, 404)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def do_PUT(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path.rstrip("/")
+        try:
+            m = re.match(r"^/api/articles/(\d+)$", path)
+            if m:
+                self.handle_update_article(int(m.group(1)), self.read_json_body())
+            else:
+                self.send_json({"error": "Not found"}, 404)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def do_DELETE(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path.rstrip("/")
+        try:
+            m = re.match(r"^/api/articles/(\d+)$", path)
+            if m:
+                self.handle_delete_article(int(m.group(1)))
+            else:
+                self.send_json({"error": "Not found"}, 404)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -232,6 +276,81 @@ class KBHandler(http.server.BaseHTTPRequestHandler):
         self.send_cors_headers()
         self.end_headers()
         self.wfile.write(data)
+
+    def handle_create_article(self, data):
+        conn = get_db()
+        tags = ", ".join(data.get("tags", [])) if isinstance(data.get("tags"), list) else data.get("tags", "")
+        links = json.dumps(data.get("links", []))
+        case_refs = json.dumps(data.get("case_references", []))
+        images = json.dumps(data.get("images", []))
+        people = ", ".join(data.get("people_mentioned", [])) if isinstance(data.get("people_mentioned"), list) else data.get("people_mentioned", "")
+        title = data.get("title", "")
+        content = data.get("content", "")
+        search_text = f"{title} {content} {tags}"
+        cursor = conn.execute(
+            """INSERT INTO articles (title, content, category, tags, links, case_references,
+               images, source_page, created_date, people_mentioned, search_text, source_pdf)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (title, content, data.get("category", ""), tags, links, case_refs,
+             images, data.get("source_page"), data.get("created_date", ""),
+             people, search_text, data.get("source_pdf", ""))
+        )
+        conn.execute("INSERT INTO articles_fts(articles_fts) VALUES('rebuild')")
+        conn.commit()
+        article_id = cursor.lastrowid
+        conn.close()
+        self.send_json({"id": article_id, "message": "Article created"}, 201)
+
+    def handle_update_article(self, aid, data):
+        conn = get_db()
+        if not conn.execute("SELECT id FROM articles WHERE id = ?", (aid,)).fetchone():
+            conn.close()
+            self.send_json({"error": "Not found"}, 404)
+            return
+        tags = ", ".join(data.get("tags", [])) if isinstance(data.get("tags"), list) else data.get("tags", "")
+        links = json.dumps(data.get("links", []))
+        case_refs = json.dumps(data.get("case_references", []))
+        images = json.dumps(data.get("images", []))
+        people = ", ".join(data.get("people_mentioned", [])) if isinstance(data.get("people_mentioned"), list) else data.get("people_mentioned", "")
+        title = data.get("title", "")
+        content = data.get("content", "")
+        search_text = f"{title} {content} {tags}"
+        conn.execute(
+            """UPDATE articles SET title=?, content=?, category=?, tags=?, links=?,
+               case_references=?, images=?, source_page=?, created_date=?,
+               people_mentioned=?, search_text=?, source_pdf=? WHERE id=?""",
+            (title, content, data.get("category", ""), tags, links, case_refs,
+             images, data.get("source_page"), data.get("created_date", ""),
+             people, search_text, data.get("source_pdf", ""), aid)
+        )
+        conn.execute("INSERT INTO articles_fts(articles_fts) VALUES('rebuild')")
+        conn.commit()
+        conn.close()
+        self.send_json({"message": "Article updated"})
+
+    def handle_delete_article(self, aid):
+        conn = get_db()
+        if not conn.execute("SELECT id FROM articles WHERE id = ?", (aid,)).fetchone():
+            conn.close()
+            self.send_json({"error": "Not found"}, 404)
+            return
+        conn.execute("DELETE FROM articles WHERE id = ?", (aid,))
+        conn.execute("INSERT INTO articles_fts(articles_fts) VALUES('rebuild')")
+        conn.commit()
+        conn.close()
+        self.send_json({"message": "Article deleted"})
+
+    def handle_upload_images(self, data):
+        import time as _time
+        uploaded = []
+        for img in data.get("images", []):
+            fname = img.get("filename", "upload.png")
+            safe = re.sub(r'[^\w.\-]', '_', fname)
+            base, ext = os.path.splitext(safe)
+            safe = f"{base}_{int(_time.time() * 1000)}{ext}"
+            (IMG_DIR / safe).write_bytes(base64.b64decode(img["data"]))
+            uploaded.append(safe)
+        self.send_json({"uploaded": uploaded})
 
     def handle_static(self, request_path):
         if request_path in ("", "/"):
